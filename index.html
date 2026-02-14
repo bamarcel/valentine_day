@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Petite surprise pour toi ❤️</title>
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at center, #1a001f, #000);
+    color: white;
+    font-family: Arial, sans-serif;
+    display: grid;
+    grid-template-rows: 1fr auto auto 1fr; 
+    grid-template-columns: 1fr auto 1fr;  
+    place-items: center;
+    overflow: hidden;
+    text-align: center;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+    radial-gradient(2px 2px at 20% 30%, white, transparent),
+    radial-gradient(1.5px 1.5px at 70% 80%, white, transparent),
+    radial-gradient(1.5px 1.5px at 40% 60%, white, transparent),
+    radial-gradient(2px 2px at 85% 20%, white, transparent),
+    radial-gradient(1px 1px at 10% 90%, white, transparent);
+    background-repeat: repeat;
+    animation: twinkle 6s infinite alternate;
+    z-index: -1;
+}
+
+@keyframes twinkle { from { opacity:0.4;} to{opacity:1;} }
+
+/* Images des coins (cachées au départ) */
+.corner {
+    width: 225px;
+    height: 225px;
+    object-fit: cover;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.5s ease;
+    opacity: 0;
+    transform: scale(0);
+}
+
+.corner.show { 
+    opacity: 1;
+    transform: scale(1);
+}
+
+.corner:hover { transform: scale(1.1); }
+
+.top-left { grid-row:1; grid-column:1; }
+.top-right { grid-row:1; grid-column:3; }
+.bottom-left { grid-row:4; grid-column:1; }
+.bottom-right { grid-row:4; grid-column:3; }
+
+/* Cœur au centre */
+.center {
+    grid-row:2;
+    grid-column:2;
+    width: 200px;
+    height:200px;
+    background:#cc333f;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    color:white;
+    border-radius:50%;
+    box-shadow:0 0 30px rgba(255,46,136,0.7);
+    cursor:pointer;
+    transition: transform 0.3s ease;
+}
+.center:hover { transform: scale(1.05); }
+
+/* Texte sous le cœur */
+#finalText {
+    grid-row:3;
+    grid-column:2;
+    margin-top:20px;
+    font-size:20px;
+    opacity:0;
+    transition: opacity 0.6s ease;
+}
+#finalText.visible { opacity:1; }
+
+/* Compteur */
+#counter {
+    position: fixed;
+    bottom:10px;
+    left:50%;
+    transform: translateX(-50%);
+    font-size:14px;
+    opacity:0.8;
+}
+</style>
+</head>
+<body>
+    <audio id="bgMusic" src="musique.mp3"></audio> </audio>
+
+<!-- Images des coins -->
+<img src="drole1.jpeg" class="corner top-left" onclick="showWord('Will')" />
+<img src="frais1.jpeg" class="corner top-right" onclick="showWord('you be')" />
+<img src="drole2.jpeg" class="corner bottom-left" onclick="showWord('my')" />
+<img src="frais2.jpeg" class="corner bottom-right" onclick="showWord('Valentine?')" />
+
+<!-- Cœur au centre -->
+<div class="center" onclick="revealPhotos()">❤️ Clique ici ❤️</div>
+
+<!-- Texte qui apparaît -->
+<div id="finalText"></div>
+
+<!-- Compteur -->
+<div id="counter"></div>
+
+<div id="easterEgg" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  color: #cc333f;
+  font-family: 'Georgia', 'Palatino Linotype', Palatino, serif;
+  font-size: 28px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  z-index: 1000;
+  flex-direction: column; /* empile texte + bouton */
+">
+    <p style="max-width: 1000px;">
+    Dans notre malheur, j’ai été inspiré et j’ai voulu te créer ce petit cadeau (je sais qu’on avait dit qu’on ne s’offrirait rien, mais bon… tu as commencé avec un bouquet). </br></br>
+    Je dois admettre que tu as peut-être raison, on manque de jolies photos, mais bizarrement, sur chacune d’elles, je te trouve magnifique. Je t’aime fort et bonne Saint-Valentin ❤️ ! </br></br>
+    (PS : après que tu m’aies raccroché au nez, je disais simplement que tu méritais d’être célébrée chaque jour de l’année, mon amour.)
+</p>
+  <button onclick="hideEasterEgg()" style="
+    margin-top: 15px; /* juste en dessous du texte */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #ff2e88;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+  ">Fermer</button>
+</div>
+
+
+<script>
+const correctOrder = ['Will','you be','my','Valentine?'];
+let words = [];
+let firstAttempt = true;
+let photosShown = false;
+
+function revealPhotos() {
+    if (!photosShown) {
+        document.getElementById('bgMusic').play();
+        photosShown = true;
+        document.querySelectorAll('.corner').forEach(img => img.classList.add('show'));
+    }
+}
+
+function showWord(word) {
+    if (!words.includes(word)) words.push(word);
+    const textDiv = document.getElementById('finalText');
+    textDiv.textContent = words.join(' ');
+    textDiv.classList.add('visible');
+
+    if (words.length === correctOrder.length) {
+    const success = words.every((w,i)=> w===correctOrder[i]);
+    if (success) {
+        if (firstAttempt) {
+            const smallText = document.createElement('div');
+            smallText.textContent = "Je savais que t’allais y arriver ! ❤️";
+            smallText.style.fontSize = "16px";
+            smallText.style.marginTop = "5px";
+            smallText.style.cursor = "pointer"; // indique que c’est cliquable
+            smallText.id = "secretText"; // on peut le sélectionner
+            smallText.addEventListener('click', showEasterEgg); // clic = easter egg
+            textDiv.appendChild(smallText);
+        } 
+        else {
+            const smallText = document.createElement('div');
+            smallText.textContent = "Tu l’as fait ! ❤️";
+            smallText.style.fontSize = "16px";
+            smallText.style.marginTop = "5px";
+            smallText.style.cursor = "pointer";
+            smallText.id = "secretText";
+            smallText.addEventListener('click', showEasterEgg);
+            textDiv.appendChild(smallText);
+        }
+    } else {
+        textDiv.textContent = "Réessaie ! 😅";
+        firstAttempt = false;
+        setTimeout(()=>{
+        words=[];
+        textDiv.textContent="";
+        textDiv.classList.remove('visible');
+        },1500);
+    }
+    }
+}
+
+function showEasterEgg() {
+  const egg = document.getElementById('easterEgg');
+  if(egg) egg.style.display = 'flex';
+}
+
+function hideEasterEgg() {
+  const egg = document.getElementById('easterEgg');
+  if(egg) egg.style.display = 'none';
+}
+
+// ===== Compteur =====
+const startDate = new Date('2025-08-10'); 
+function updateCounter() {
+    const now = new Date();
+    const diff = now - startDate;
+    const days = Math.floor(diff/(1000*60*60*24));
+    const hours = Math.floor((diff/(1000*60*60))%24);
+    const minutes = Math.floor((diff/(1000*60))%60);
+    document.getElementById('counter').textContent =
+    `${days} jours ensemble • ${hours}h ${minutes}m • et pour toujours ∞`;
+}
+setInterval(updateCounter,60000);
+updateCounter();
+</script>
+
+</body>
+</html>
